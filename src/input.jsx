@@ -11,6 +11,35 @@ import { useLocation } from 'react-router-dom';
 import Doc from "./Doc";
 import { useNavigate } from 'react-router-dom';
 
+const sendEmail = async () => {
+  const email = prompt("Enter your email:");
+  const message = "Thanks for playing! Here's a MongoDB guide: https://www.mongodb.com/docs/";
+
+  if (!email) {
+    alert("Email is required.");
+    return;
+  }
+
+  try {
+    const response = await fetch("https://7mpw64ebql.execute-api.ap-south-1.amazonaws.com/SendEmailFunction", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, message }),
+    });
+
+    const data = await response.json();
+
+    if (response.ok) {
+      alert("Email sent successfully!");
+    } else {
+      alert("Failed to send email: " + data.message);
+    }
+  } catch (err) {
+    console.error(err);
+    alert("Something went wrong!");
+  }
+};
+
 
 function Input() {
     const location = useLocation();
@@ -18,8 +47,8 @@ function Input() {
     let parameterObject
     const [docs, setDocs] = React.useState([])
     const [question, setQuestion] = React.useState({
-        qn:"",
-        ans:""
+        qn: "",
+        ans: ""
     })
 
     useEffect(() => {
@@ -38,14 +67,14 @@ function Input() {
 
 
     const [value, setValue] = React.useState("db.collection.operation(query) \n \n \n \n \n");
-    const [ans , setAns]=React.useState("")
+    const [ans, setAns] = React.useState("")
     const onChange = React.useCallback((val, viewUpdate) => {
         console.log('val:', val);
         setValue(val);
     }, []);
 
     async function handleSubmit() {
-        const response = await Axios.get("http://15.206.106.126:5000/", {
+        const response = await Axios.get("https://backend-g50b.onrender.com/", {
             params: {
                 input: value
             }
@@ -54,16 +83,16 @@ function Input() {
         setDocs(response.data)
     }
 
-    function handleAnsChange(e){
+    function handleAnsChange(e) {
         setAns(e.target.value)
     }
 
-    function handleAnsSubmit(){
-        if(ans==question.ans){
+    function handleAnsSubmit() {
+        if (ans == question.ans) {
             navigate(`/`);
         }
-        else{
-            setDocs([{"Result" :"Answer is incorrect" }])
+        else {
+            setDocs([{ "Result": "Answer is incorrect" }])
         }
     }
 
@@ -117,6 +146,11 @@ function Input() {
                 marginLeft: "auto",
                 marginRight: "auto",
             }} src="https://mystery.knightlab.com/schema.png" alt="" />
+            <button onClick={sendEmail}  variant="contained" type="submit" className="valorant-btn" >
+                <span class="underlay">
+                    <span class="label">Get Resources</span>
+                </span>
+            </button>
             <p style={{
                 fontSize: "1.5rem",
                 marginBottom: "-30px"
@@ -137,7 +171,7 @@ function Input() {
                 </span>
             </button>
 
-            
+
             <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
                 <p className="mobile-paragraph">Submit Your Answer Here</p>
                 <input value={ans} onChange={handleAnsChange}></input>
